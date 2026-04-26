@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-03-31.basil',
+  apiVersion: '2026-04-22.dahlia',
 });
 
 export const STRIPE_PRICES = {
@@ -34,7 +34,7 @@ export async function createCheckoutSession({
 }
 
 export async function createCustomer({email}: {email: string}) {
-  return stripe.customers.create({email, locale: 'sv'});
+  return stripe.customers.create({email});
 }
 
 export async function getSubscription(subscriptionId: string) {

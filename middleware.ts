@@ -13,17 +13,35 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value, options)
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options as any)
           );
         },
       },
     }
   );
+
+  // Check auth for protected routes
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/konto') ||
+                           request.nextUrl.pathname.startsWith('/rapport');
+  const isAuthRoute = request.nextUrl.pathname.startsWith('/konto/inloggning');
+
+  if (isProtectedRoute && !user && !isAuthRoute) {
+    const redirectUrl = new URL('/konto/inloggning', request.url);
+    redirectUrl.searchParams.set('redirect', request.nextUrl.pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // If logged in and trying to access login page, redirect to account
+  if (isAuthRoute && user) {
+    return NextResponse.redirect(new URL('/konto', request.url));
+  }
 
   return supabaseResponse;
 }

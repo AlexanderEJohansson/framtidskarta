@@ -7,6 +7,9 @@
  * This is a thin wrapper around MyClaw/Minimax. Easy to swap for another AI provider.
  */
 
+import type { SimplifiedAnalysisResult, FullAnalysisResult } from '@/types/analys';
+import type { Profile } from '@/types/profile';
+
 const MYCLAW_API_KEY = 'db07dbb3-5fa4-479e-854d-a7fe7d5f1d8f.5e48a0af-6397-417e-b35e-c5348f84fe50';
 const MYCLAW_BASE_URL = 'https://api.myclaw.ai/v1';
 
@@ -180,6 +183,113 @@ JSON:`;
       quickestPath: [],
       relevantJobIds: [],
       relevantEducations: [],
+    };
+  }
+}
+
+// ─── NEW ANALYSIS FUNCTIONS FOR CORE FLOW ─────────────────────────────────
+
+/**
+ * Run simplified analysis (free sample).
+ * Returns limited results with clear "gratis förenklad rapport" marker.
+ */
+export async function runSimplifiedAnalysis(cvText: string): Promise<SimplifiedAnalysisResult> {
+  const prompt = `Du är en expert på att analysera CV:n och ge en förenklad kompetensgap-analys för den svenska arbetsmarknaden.
+
+Denna är en GRATIS FÖRENKLAD RAPPORT — ge endast översikt och topp-3 gap.
+
+CV-TEXT:
+${cvText}
+
+Svara ENDAST med JSON i detta format (inget annat text):
+
+{
+  "skills": ["kompetens1", "kompetens2", "kompetens3"],
+  "experience": ["erfarenhet1", "erfarenhet2"],
+  "education": ["utbildning1", "utbildning2"],
+  "summary_sv": "Kort sammanfattning av profilen på svenska (max 2 meningar).",
+  "gap_items": ["De 3 viktigaste kompetensgapen"],
+  "isFreeSample": true
+}
+
+SVARA MED ENDAST JSON.`;
+
+  const result = await chatCompletion({
+    messages: [{role: 'user', content: prompt}],
+    temperature: 0.3,
+    maxTokens: 1200,
+  });
+
+  try {
+    const cleaned = result.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+    return JSON.parse(cleaned) as SimplifiedAnalysisResult;
+  } catch {
+    return {
+      skills: [],
+      experience: [],
+      education: [],
+      summary_sv: 'Kunde inte analysera CV:t.',
+      gap_items: [],
+      isFreeSample: true,
+    };
+  }
+}
+
+/**
+ * Run full analysis (paid subscription).
+ * Returns complete gap analysis with recommendations.
+ */
+export async function runFullAnalysis(
+  cvText: string,
+  profileData?: Profile
+): Promise<FullAnalysisResult> {
+  const profileSection = profileData
+    ? `- Sparade kompetenser: ${(profileData.extracted_skills || []).join(', ') || 'Inga'}
+- Sparad erfarenhet: ${(profileData.extracted_experience || []).join(', ') || 'Ingen'}
+- Sparad utbildning: ${(profileData.extracted_education || []).join(', ') || 'Ingen'}`
+    : '';
+
+  const prompt = `Du är en expert på att analysera CV:n och ge en fullständig kompetensgap-analys för den svenska arbetsmarknaden.
+
+CV-TEXT:
+${cvText}
+
+${profileSection ? `SPARAD PROFILDATA:\n${profileSection}` : ''}
+
+Svara ENDAST med JSON i detta format (inget annat text):
+
+{
+  "skills": ["kompetens1", "kompetens2", "kompetens3", ...],
+  "experience": ["erfarenhet1", "erfarenhet2", ...],
+  "education": ["utbildning1", "utbildning2", ...],
+  "gap_summary_sv": "Detaljerad sammanfattning av kompetensgapet på svenska, 3-5 meningar.",
+  "recommendations": ["Specifik rekommendation 1", "Specifik rekommendation 2", "Specifik rekommendation 3"],
+  "matched_occupations": ["Yrke 1 som matchar profilen väl", "Yrke 2", "Yrke 3"],
+  "education_paths": ["YH-utbildning: X", "Komvux-kurs: Y", "Övriga utbildningsvägar: Z"],
+  "isFreeSample": false
+}
+
+SVARA MED ENDAST JSON.`;
+
+  const result = await chatCompletion({
+    messages: [{role: 'user', content: prompt}],
+    temperature: 0.5,
+    maxTokens: 2500,
+  });
+
+  try {
+    const cleaned = result.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+    return JSON.parse(cleaned) as FullAnalysisResult;
+  } catch {
+    return {
+      skills: [],
+      experience: [],
+      education: [],
+      gap_summary_sv: 'Kunde inte genomföra fullständig analys.',
+      recommendations: [],
+      matched_occupations: [],
+      education_paths: [],
+      isFreeSample: false,
     };
   }
 }
