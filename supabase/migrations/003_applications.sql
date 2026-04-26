@@ -345,7 +345,7 @@ SELECT
 FROM dim_occupations o
 JOIN fact_retirement_waves rw ON rw.occupation_id = o.id
 JOIN dim_regions r ON r.id = rw.region_id
-JOIN dim_time t ON t.id = rw.time_id
+JOIN dim_time t ON t.date = rw.time_id
 WHERE o.ssyk_4 LIKE '7%' -- VVS-koder
   AND r.region_code = '14' -- Vastra Gotaland
   AND t.is_projection = TRUE
@@ -373,7 +373,7 @@ SELECT
   t.year
 FROM dim_occupations o
 JOIN fact_future_readiness_scores frs ON frs.occupation_id = o.id
-JOIN dim_time t ON t.id = frs.time_id
+JOIN dim_time t ON t.date = frs.time_id
 WHERE t.is_projection = TRUE
   AND t.year BETWEEN 2026 AND 2030
 ORDER BY frs.future_readiness_index DESC
