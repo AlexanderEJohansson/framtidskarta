@@ -5,8 +5,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 export const STRIPE_PRICES = {
-  private: 'price_privat_19_kr', // TODO: Replace with actual Stripe Price ID
-  b2b: 'price_b2b_999_kr', // TODO: Replace with actual Stripe Price ID
+  private: process.env.NEXT_PUBLIC_STRIPE_PRIVAT_PRICE_ID!,
+  b2b: process.env.NEXT_PUBLIC_STRIPE_B2B_PRICE_ID!,
 } as const;
 
 export async function createCheckoutSession({
