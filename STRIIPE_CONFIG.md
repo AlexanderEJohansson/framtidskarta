@@ -1,0 +1,9 @@
+# Stripe-konfiguration
+# Pricing from BRIEF.md:
+# - Privatpersoner: 19 kr/mån
+# - B2B (företag/utbildare): 999 kr/mån
+#
+# TODO: Add these env vars when Stripe account is configured:
+# STRIPE_SECRET_KEY=sk_live_...
+# STRIPE_WEBHOOK_SECRET=whsec_...
+# NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
