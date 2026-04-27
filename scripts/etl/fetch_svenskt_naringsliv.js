@@ -7,7 +7,8 @@
 const https = require('https');
 
 const SUPABASE_PROJECT = 'djdqpkslbvgniweqofkc';
-const SUPABASE_TOKEN = 'sbp_7de71ff8fefea43fe0c14095ee382a437ec27f96';
+// PAT loaded from env var (never hardcode)
+const SUPABASE_TOKEN = process.env.SUPABASE_PAT || '';
 
 function runQuery(sql) {
   return new Promise((resolve, reject) => {

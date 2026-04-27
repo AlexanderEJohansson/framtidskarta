@@ -1,7 +1,8 @@
 // fetch_regions.js — Load Swedish regions (län) into dim_regions
 const https = require('https');
 const PROJECT = 'djdqpkslbvgniweqofkc';
-const TOKEN = 'sbp_7de71ff8fefea43fe0c14095ee382a437ec27f96';
+// PAT loaded from env var (never hardcode)
+const TOKEN = process.env.SUPABASE_PAT || '';
 
 function rq(sql) {
   return new Promise((res, rej) => {

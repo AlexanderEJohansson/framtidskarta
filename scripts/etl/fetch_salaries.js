@@ -1,7 +1,8 @@
 // fetch_salaries.js — Load SCB lönestatistik per SSYK
 const https = require('https');
 const PROJECT = 'djdqpkslbvgniweqofkc';
-const TOKEN = 'sbp_7de71ff8fefea43fe0c14095ee382a437ec27f96';
+// PAT loaded from env var (never hardcode)
+const TOKEN = process.env.SUPABASE_PAT || '';
 function rq(sql) {
   return new Promise((res, rej) => {
     const body = JSON.stringify({ query: sql });
@@ -43,9 +44,9 @@ async function main() {
     const oid = occMap[s.ssyk];
     if (!oid) continue;
     for (const yr of [2023,2024,2025]) {
-      const sql = `INSERT INTO fact_salaries (time_id, occupation_id, median_salary_sek, salary_growth_pct, source_id) ` +
-        `SELECT '${yr}-01-01', '${oid}', ${s.median}, ${s.growth}, ${sourceId ? '\'' + sourceId + '\'' : 'NULL'} ` +
-        `ON CONFLICT (occupation_id, time_id) DO UPDATE SET median_salary_sek=EXCLUDED.median_salary_sek, salary_growth_pct=EXCLUDED.salary_growth_pct`;
+      const sql = `INSERT INTO fact_salaries (time_id, occupation_id, region_id, sector_id, median_monthly_salary, source) ` +
+        `VALUES ('${yr}-01-01'::date, '${oid}', NULL, NULL, ${s.median}, 'SCB Lonestruktur') ` +
+        `ON CONFLICT (occupation_id, region_id, sector_id, time_id) DO UPDATE SET median_monthly_salary=EXCLUDED.median_monthly_salary`;
       try { await rq(sql); inserted++; } catch(e) {}
     }
   }
