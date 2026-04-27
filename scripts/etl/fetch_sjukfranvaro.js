@@ -76,12 +76,16 @@ async function main() {
       let sql = "INSERT INTO fact_sickness_absence (";
       sql += "time_id, sickness_type, sick_leave_rate, avg_sick_days_per_case, ";
       sql += "musculoskeletal_related_pct, mental_health_related_pct, ";
-      sql += "risk_category, source, source_url) VALUES (";
-      sql += "'2024-01-01', ' sickness', " + item.sickness_rate + ", " + item.avg_sick_days + ", ";
+      sql += "risk_category, source, source_url) VALUES ";
+      sql += "('2024-01-01', 'physical', " + item.sickness_rate + ", " + item.avg_sick_days + ", ";
       sql += item.diagnosis_breakdown.musculoskeletal + ", " + item.diagnosis_breakdown.mental + ", ";
       sql += "'" + item.risk_category + "', ";
       sql += "'Forsakringskassan', ";
-      sql += "'https://www.forsakringskassan.se/')";
+      sql += "'https://www.forsakringskassan.se/') ";
+      sql += "ON CONFLICT (time_id, sickness_type) DO UPDATE SET ";
+      sql += "sick_leave_rate=EXCLUDED.sick_leave_rate, avg_sick_days_per_case=EXCLUDED.avg_sick_days_per_case, ";
+      sql += "musculoskeletal_related_pct=EXCLUDED.musculoskeletal_related_pct, mental_health_related_pct=EXCLUDED.mental_health_related_pct, ";
+      sql += "risk_category=EXCLUDED.risk_category";
       
       try {
         const result = await runQuery(sql);
