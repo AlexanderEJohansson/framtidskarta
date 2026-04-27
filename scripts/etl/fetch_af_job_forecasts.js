@@ -69,11 +69,13 @@ async function main() {
     const occ = occs.find(o => o.ssyk_4 === f.ssyk);
     if (!occ) continue;
     for (const yr of [2026, 2027, 2028, 2029, 2030]) {
-      const sql = `INSERT INTO fact_job_forecasts (time_id, occupation_id, employment_outlook, shortage_score, demand_forecast, demand_growth_pct, source_id) ` +
-        `SELECT '${yr}-01-01', '${occ.id}', '${f.outlook}', ${f.shortage}, '${f.demand}', ${f.demand_growth_pct}, ` +
-        `(SELECT id FROM data_sources WHERE source_name_sv = 'Arbetsförmedlingen' LIMIT 1) ` +
-        `ON CONFLICT (occupation_id, time_id) DO UPDATE SET employment_outlook=EXCLUDED.employment_outlook, shortage_score=EXCLUDED.shortage_score`;
-      try { await rq(sql); } catch(e) {}
+      const sql = `INSERT INTO fact_job_forecasts (time_id, occupation_id, region_id, forecast_year, projected_shortage, shortage_severity, projected_employment_change_pct, source, source_url, ingestion_date) ` +
+        `VALUES ('${yr}-01-01'::date, '${occ.id}', NULL, ${yr}, ${f.shortage}, '${f.demand}', ${f.demand_growth_pct}, ` +
+        `'Arbetsförmedlingen', 'https://www.ams.se/yrkesbarometer', current_date) ` +
+        `ON CONFLICT (occupation_id, region_id, forecast_year) DO UPDATE SET ` +
+        `projected_shortage=EXCLUDED.projected_shortage, shortage_severity=EXCLUDED.shortage_severity, ` +
+        `projected_employment_change_pct=EXCLUDED.projected_employment_change_pct`;
+      try { await rq(sql); } catch(e) { console.log('Error for', f.ssyk, yr, e.message.substring(0,100)); }
     }
   }
 
