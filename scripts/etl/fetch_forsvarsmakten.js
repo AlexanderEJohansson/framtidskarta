@@ -7,7 +7,7 @@
 const https = require('https');
 
 const SUPABASE_PROJECT = 'djdqpkslbvgniweqofkc';
-const SUPABASE_TOKEN = 'sbp_b3b0d98a2335b0a9e51506824bc7c1795967b14d';
+const SUPABASE_TOKEN = 'sbp_7de71ff8fefea43fe0c14095ee382a437ec27f96';
 
 function runQuery(sql) {
   return new Promise((resolve, reject) => {

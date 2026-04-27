@@ -1,7 +1,7 @@
 // fetch_af_job_forecasts.js — Load Arbetsförmedlingen yrkesbarometer
 const https = require('https');
 const PROJECT = 'djdqpkslbvgniweqofkc';
-const TOKEN = 'sbp_b3b0d98a2335b0a9e51506824bc7c1795967b14d';
+const TOKEN = 'sbp_7de71ff8fefea43fe0c14095ee382a437ec27f96';
 
 function rq(sql) {
   return new Promise((res, rej) => {

@@ -1,7 +1,7 @@
 // fetch_scb_occupations.js — Load dim_occupations with SSYK-4 occupation data
 const https = require('https');
 const PROJECT = 'djdqpkslbvgniweqofkc';
-const TOKEN = 'sbp_b3b0d98a2335b0a9e51506824bc7c1795967b14d';
+const TOKEN = 'sbp_7de71ff8fefea43fe0c14095ee382a437ec27f96';
 
 function rq(sql) {
   return new Promise((res, rej) => {
@@ -111,9 +111,9 @@ async function main() {
   console.log('Loading ' + OCCUPATIONS.length + ' occupations...');
   let inserted = 0;
   for (const o of OCCUPATIONS) {
-    const sql = `INSERT INTO dim_occupations (ssyk_4, occupation_title_sv, sector, source_id, green_transition_score, automation_risk_score, defence_relevance) ` +
-      `VALUES ('${o.ssyk_4}', '${o.title.replace(/'/g, "''")}', '${o.sector}', ${sourceId ? '\'' + sourceId + '\'' : 'NULL'}, ${o.green_transition_score}, ${o.automation_risk_score}, 0) ` +
-      `ON CONFLICT (ssyk_4) DO UPDATE SET occupation_title_sv=EXCLUDED.occupation_title_sv, sector=EXCLUDED.sector, green_transition_score=EXCLUDED.green_transition_score, automation_risk_score=EXCLUDED.automation_risk_score`;
+    const sql = `INSERT INTO dim_occupations (ssyk_4, occupation_title_sv, source_id, green_transition_score, automation_risk_score, defence_relevance) ` +
+      `VALUES ('${o.ssyk_4}', '${o.title.replace(/'/g, "''")}', ${sourceId ? '\'' + sourceId + '\'' : 'NULL'}, ${o.green_transition_score}, ${o.automation_risk_score}, false) ` +
+      `ON CONFLICT (ssyk_4) DO UPDATE SET occupation_title_sv=EXCLUDED.occupation_title_sv, green_transition_score=EXCLUDED.green_transition_score, automation_risk_score=EXCLUDED.automation_risk_score`;
     try {
       const r = await rq(sql);
       if (!r.error) inserted++;
